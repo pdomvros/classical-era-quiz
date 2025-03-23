@@ -1,1 +1,509 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>✨ Πόσο καλά ξέρεις την Κλασσική Εποχή; ✨</title>
+
+  <!-- Google Font: Comfortaa Semi Bold -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #ffd700;
+      font-family: 'Comfortaa', sans-serif;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+    }
+
+    h1.title-activity {
+      font-size: 1.8em; /* λίγο πιο μεγάλο τίτλο */
+      margin-top: 0.2em;
+    }
+
+    .creator-info {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #ffd700;
+    }
+
+    #app-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+
+    .scoreboard {
+      margin-top: 20px;
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #111; /* λίγο πιο φωτεινό από #000 */
+    }
+
+    .scoreboard th, .scoreboard td {
+      border: 1px solid #444;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .scoreboard th {
+      background-color: #333;
+    }
+
+    .button-main {
+      display: inline-block;
+      background-color: #ffd700;
+      color: #000;
+      padding: 10px 20px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s ease;
+    }
+
+    .button-main:hover {
+      background-color: #daa520;
+    }
+
+    .question-box {
+      margin-top: 15px;
+      background-color: #111;
+      padding: 15px;
+      border-radius: 6px;
+    }
+
+    .question-box .question {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .answers button {
+      display: block;
+      background-color: #333;
+      margin: 5px 0;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      color: #ffd700;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .answers button:hover {
+      background-color: #555;
+    }
+
+    .answers button.correct-choice {
+      background-color: #026f02 !important; /* πρασίνισμα σωστού */
+      color: #fff !important;
+    }
+
+    .answers button.disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .feedback {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .feedback.correct {
+      color: #00ff00; /* πράσινο */
+    }
+
+    .feedback.incorrect {
+      color: #ff4444; /* κόκκινο */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="creator-info">
+    Δημιουργία: Παναγιώτης Δόμβρος 2025 (CC BY-NC)
+  </div>
+  <h1 class="title-activity">✨ Πόσο καλά ξέρεις την Κλασσική Εποχή; ✨</h1>
+
+  <div id="app-container">
+    <!-- Κουμπί επιλογής ομάδας και ερώτησης -->
+    <button id="pickButton" class="button-main">🔎 Επίλεξε ομάδα και Ρώτησε</button>
+
+    <!-- Περιοχή εμφάνισης ερώτησης/απαντήσεων -->
+    <div id="questionArea" class="question-box" style="display: none;">
+      <div id="currentGroup" style="font-style: italic; margin-bottom: 5px;"></div>
+      <div class="question" id="questionText"></div>
+      <div class="answers" id="answersContainer"></div>
+      <div id="feedback" class="feedback"></div>
+    </div>
+
+    <!-- Scoreboard -->
+    <h3>Σκορ Ομάδων</h3>
+    <table class="scoreboard" id="scoreboard">
+      <thead>
+        <tr>
+          <th>Ομάδα</th>
+          <th>Σκορ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Γραμμές του πίνακα -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Προσθέτουμε τα αρχεία ήχου - με την προϋπόθεση ότι success.mp3 και fail.mp3 υπάρχουν στον ίδιο φάκελο
+    const successSound = new Audio('success.mp3');
+    const failSound = new Audio('fail.mp3');
+
+    const quizData = [
+      {
+        groupName: "Ιστορικοί 📜",
+        questions: [
+          {
+            text: "Ο Ηρόδοτος θεωρείται πατέρας της Ιστορίας επειδή:",
+            choices: [
+              "περιέγραψε μόνο μύθους",
+              "συστηματοποίησε την αφήγηση των Μηδικών Πολέμων και κατέγραψε ιστορικά στοιχεία",
+              "δεν αναφέρθηκε καθόλου στην Αίγυπτο",
+              "έγραψε μόνο για τον Πελοποννησιακό Πόλεμο"
+            ],
+            correctIndex: 1
+          },
+          {
+            text: "Ο Θουκυδίδης ξεχωρίζει από τον Ηρόδοτο γιατί:",
+            choices: [
+              "προτίμησε τα μυθολογικά στοιχεία",
+              "έγραψε έργα για τη ρητορική και τη φιλοσοφία",
+              "επικεντρώθηκε στις πραγματικές αιτίες των γεγονότων με επιστημονικό τρόπο",
+              "ήταν ο πρώτος που μίλησε για τους σοφιστές"
+            ],
+            correctIndex: 2
+          },
+          {
+            text: "Ο Ξενοφών αναφέρεται κυρίως:",
+            choices: [
+              "στην αρχιτεκτονική της εποχής",
+              "σε μυθολογικές εκστρατείες",
+              "σε κωμωδίες που ανέβασε στο θέατρο",
+              "σε γεγονότα της εποχής του με πολιτικο-στρατιωτική σκοπιά"
+            ],
+            correctIndex: 3
+          },
+          {
+            text: "Ποιος θεωρείται θεμελιωτής της επιστημονικής ιστορικής έρευνας;",
+            choices: [
+              "Ηρόδοτος",
+              "Θουκυδίδης",
+              "Ξενοφών",
+              "Σωκράτης"
+            ],
+            correctIndex: 1
+          }
+        ]
+      },
+      {
+        groupName: "Φιλόσοφοι/Παιδαγωγοί 🤔",
+        questions: [
+          {
+            text: "Οι σοφιστές επικρίθηκαν επειδή:",
+            choices: [
+              "θεωρήθηκε ότι προωθούσαν το προσωπικό όφελος σε βάρος του συλλογικού",
+              "έγραφαν μόνο για τραγωδίες",
+              "προετοίμαζαν τους πολίτες για ιατρική",
+              "αγνοούσαν τη ρητορική"
+            ],
+            correctIndex: 0
+          },
+          {
+            text: "Ο Σωκράτης θεωρείται πατέρας της:",
+            choices: [
+              "τραγωδίας",
+              "ιστοριογραφίας",
+              "διαλεκτικής μεθόδου",
+              "ιωνικής κιονοποιίας"
+            ],
+            correctIndex: 2
+          },
+          {
+            text: "Ο Πλάτωνας δίδασκε ότι υπάρχει:",
+            choices: [
+              "μόνο ο υλικός κόσμος των αισθήσεων",
+              "ιδανικός κόσμος Ιδεών (του καλού, του ωραίου, του ηθικού)",
+              "άρνηση κάθε πνευματικότητας",
+              "θεμελίωση της αστρονομίας και μόνο"
+            ],
+            correctIndex: 1
+          },
+          {
+            text: "Ο Αριστοτέλης έθεσε βάσεις:",
+            choices: [
+              "στη ρητορική μόνο",
+              "σε πλήθος επιστημών (ιατρική, ζωολογία, πολιτική κ.ά.)",
+              "στο σατυρικό δράμα",
+              "στον περσικό στρατό"
+            ],
+            correctIndex: 1
+          }
+        ]
+      },
+      {
+        groupName: "Θέατρο/Τέχνες 🎭",
+        questions: [
+          {
+            text: "Το κράτος πλήρωνε το εισιτήριο θεάτρου διότι:",
+            choices: [
+              "δεν ήθελαν οι πολίτες να πληρώνουν φόρους",
+              "θεωρούσαν το θέατρο σημαντικό για την πολιτική και ηθική αγωγή",
+              "δεν υπήρχε άλλος τρόπος διασκέδασης",
+              "θεωρούσαν την κωμωδία θεϊκή λατρεία"
+            ],
+            correctIndex: 1
+          },
+          {
+            text: "Ο Αριστοφάνης διακρίθηκε:",
+            choices: [
+              "ως κωμικός ποιητής με τόλμη και σατιρική αθυροστομία",
+              "ως μύστης σε μυθολογικές τελετές",
+              "ως επιστημονικός ιστορικός",
+              "ως γλύπτης στον Παρθενώνα"
+            ],
+            correctIndex: 0
+          },
+          {
+            text: "Η αρχαία τραγωδία & κωμωδία αντλούσαν κυρίως θέματα:",
+            choices: [
+              "από τους μύθους, θέτοντας πολιτικά & ηθικά διδάγματα",
+              "από ρητορικούς διαλόγους του Σωκράτη",
+              "από ξένες μεταφράσεις των Περσών",
+              "αποκλειστικά από ερωτικά ποιήματα"
+            ],
+            correctIndex: 0
+          },
+          {
+            text: "Ποιος ΔΕΝ είναι τραγικός ποιητής;",
+            choices: [
+              "Σοφοκλής",
+              "Ευριπίδης",
+              "Αριστοφάνης",
+              "Αισχύλος"
+            ],
+            correctIndex: 2
+          }
+        ]
+      },
+      {
+        groupName: "Αρχιτεκτονική/Γλυπτική 🏛",
+        questions: [
+          {
+            text: "Ο Παρθενώνας είναι έργο των:",
+            choices: [
+              "Θουκυδίδη & Ηροδότου",
+              "Ικτίνου & Καλλικράτη",
+              "Σωκράτη & Πλάτωνα",
+              "Αισχύλου & Αριστοφάνη"
+            ],
+            correctIndex: 1
+          },
+          {
+            text: "Το κορινθιακό κιονόκρανο αποδίδεται στον:",
+            choices: [
+              "Ικτίνο",
+              "Καλλικράτη",
+              "Φειδία",
+              "Καλλίμαχο"
+            ],
+            correctIndex: 3
+          },
+          {
+            text: "Στην ύστερη κλασική εποχή, η γλυπτική χαρακτηρίζεται από:",
+            choices: [
+              "πιο ελεύθερες στάσεις & εκφραστικότητα",
+              "επιστροφή σε άκαμπτες μορφές κούρων",
+              "έντονη προτίμηση σε μεταλλικά αγάλματα μόνο",
+              "αφαίρεση κάθε ρεαλισμού"
+            ],
+            correctIndex: 0
+          },
+          {
+            text: "Τα χρυσελεφάντινα αγάλματα ήταν:",
+            choices: [
+              "λατρευτικά αγάλματα με χρυσό & ελεφαντοστό",
+              "αγάλματα από καθαρό χαλκό",
+              "κατάλοιπα μινωικής τέχνης",
+              "μικροαντικείμενα σε ιδιωτικές οικίες"
+            ],
+            correctIndex: 0
+          }
+        ]
+      },
+      {
+        groupName: "Ρητορική/Ιατρική 🗣🩺",
+        questions: [
+          {
+            text: "Η ρητορική κορυφώθηκε κυρίως:",
+            choices: [
+              "στους βασιλικούς γάμους",
+              "στα δικαστήρια & στις συνελεύσεις",
+              "στα ξενικά στρατόπεδα",
+              "στα μαντεία"
+            ],
+            correctIndex: 1
+          },
+          {
+            text: "Ο Ισοκράτης & ο Δημοσθένης ήταν:",
+            choices: [
+              "μεγάλοι ιστορικοί",
+              "διάσημοι γλύπτες",
+              "τραγικοί ποιητές",
+              "περιβόητοι ρήτορες"
+            ],
+            correctIndex: 3
+          },
+          {
+            text: "Ο Ιπποκράτης (460-370 π.Χ.) θεωρείται:",
+            choices: [
+              "μύθος της κωμωδίας",
+              "θεμελιωτής της επιστημονικής ιατρικής",
+              "πατέρας της τραγωδίας",
+              "μαθητής του Θουκυδίδη"
+            ],
+            correctIndex: 1
+          },
+          {
+            text: "Η ρητορική συνδέθηκε στενά με:",
+            choices: [
+              "τα χρυσελεφάντινα αγάλματα",
+              "τα δορυφορικά γυμνάσια",
+              "την αθηναϊκή δημοκρατία",
+              "την ίδρυση της Ακαδημίας του Πλάτωνα"
+            ],
+            correctIndex: 2
+          }
+        ]
+      }
+    ];
+
+    let scoreboardData = [
+      { groupName: "Ιστορικοί 📜", score: 0 },
+      { groupName: "Φιλόσοφοι/Παιδαγωγοί 🤔", score: 0 },
+      { groupName: "Θέατρο/Τέχνες 🎭", score: 0 },
+      { groupName: "Αρχιτεκτονική/Γλυπτική 🏛", score: 0 },
+      { groupName: "Ρητορική/Ιατρική 🗣🩺", score: 0 }
+    ];
+
+    quizData.forEach((group) => {
+      group.questionsUsed = new Set();
+    });
+
+    function updateScoreboard() {
+      const tbody = document.querySelector("#scoreboard tbody");
+      tbody.innerHTML = "";
+      scoreboardData.forEach((entry) => {
+        const row = document.createElement("tr");
+        const tdName = document.createElement("td");
+        const tdScore = document.createElement("td");
+        tdName.textContent = entry.groupName;
+        tdScore.textContent = entry.score;
+        row.appendChild(tdName);
+        row.appendChild(tdScore);
+        tbody.appendChild(row);
+      });
+    }
+
+    function pickRandomGroupAndQuestion() {
+      let tries = 0;
+      while (true) {
+        const groupIndex = Math.floor(Math.random() * 5); // 0-4
+        const groupObj = quizData[groupIndex];
+        if (groupObj.questionsUsed.size < groupObj.questions.length) {
+          // pick question
+          let questionIndex;
+          while (true) {
+            questionIndex = Math.floor(Math.random() * groupObj.questions.length);
+            if (!groupObj.questionsUsed.has(questionIndex)) {
+              groupObj.questionsUsed.add(questionIndex);
+              return { groupIndex, questionIndex };
+            }
+          }
+        }
+        tries++;
+        if (tries > 30) {
+          // all used
+          return null;
+        }
+      }
+    }
+
+    function showQuestion(groupIndex, questionIndex) {
+      const groupObj = quizData[groupIndex];
+      const questionObj = groupObj.questions[questionIndex];
+
+      document.getElementById("questionArea").style.display = "block";
+      const feedbackEl = document.getElementById("feedback");
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+
+      document.getElementById("currentGroup").textContent = `Ομάδα: ${groupObj.groupName}`;
+      document.getElementById("questionText").textContent = questionObj.text;
+
+      const answersContainer = document.getElementById("answersContainer");
+      answersContainer.innerHTML = "";
+
+      questionObj.choices.forEach((choiceText, idx) => {
+        const btn = document.createElement("button");
+        btn.textContent = choiceText;
+        btn.addEventListener("click", () => {
+          // disable όλα τα κουμπιά
+          const allBtns = answersContainer.querySelectorAll("button");
+          allBtns.forEach(b => {
+            b.disabled = true;
+            b.classList.add("disabled");
+          });
+
+          const isCorrect = (idx === questionObj.correctIndex);
+          if (isCorrect) {
+            feedbackEl.textContent = "Σωστό! ✅";
+            feedbackEl.classList.add("correct");
+            scoreboardData[groupIndex].score++;
+            updateScoreboard();
+            successSound.play(); // ήχος επιτυχίας
+          } else {
+            feedbackEl.textContent = "Λάθος! ❌";
+            feedbackEl.classList.add("incorrect");
+            failSound.play(); // ήχος αποτυχίας
+          }
+
+          // δείξε τη σωστή απάντηση με πράσινο
+          const correctBtn = allBtns[questionObj.correctIndex];
+          correctBtn.classList.add("correct-choice");
+        });
+        answersContainer.appendChild(btn);
+      });
+    }
+
+    updateScoreboard();
+
+    document.getElementById("pickButton").addEventListener("click", () => {
+      const result = pickRandomGroupAndQuestion();
+      if (!result) {
+        alert("Δεν υπάρχουν άλλες ερωτήσεις διαθέσιμες!");
+        return;
+      }
+      showQuestion(result.groupIndex, result.questionIndex);
+    });
+  </script>
+</body>
+</html>
 
